@@ -6,7 +6,7 @@ from bpy.types import Operator, Panel
 from .hooks import add_post_generate_callback, remove_post_generate_callback
 
 import rigify
-import pprint
+from rigify.utils.rig import is_valid_metarig
 
 
 def make_root_bone(armature, def_bones, export_collection):
@@ -263,14 +263,6 @@ def rig_special_handling(armature, rigs):
             bone.constraints.move(rotation_index, transform_index + 1)
 
 
-def is_rigify_metarig(obj):
-    if not obj or obj.type != 'ARMATURE':
-        return False
-    # Rigify-specific custom property found on generated rig
-    ret = "rigify_rig_ui" in obj.data
-    return ret
-
-
 class RIGIFY_PT_kr_postprocess(Panel):
     """Panel in Armature Data properties for KR-Postprocess."""
     bl_label = "kr Postprocess"
@@ -281,7 +273,7 @@ class RIGIFY_PT_kr_postprocess(Panel):
 
     @classmethod
     def poll(cls, context):
-        return is_rigify_metarig(context.object)
+        return is_valid_metarig(context)
 
     def draw(self, context):
         layout = self.layout
@@ -293,35 +285,18 @@ class RIGIFY_PT_kr_postprocess(Panel):
         layout.prop(arm, "kr_process_group_name")
 
 
-def add_kr_properties(metarig):
-    add_root_bone = metarig.data.get("kr_extra_root_bone")
-    if add_root_bone is None:
-        metarig.data["kr_extra_root_bone"] = False
-
-    process_group = metarig.data.get("kr_process_group_name")
-    if process_group is None:
-        metarig.data["kr_process_group_name"] = "Export"
-
-    enable_pp = metarig.data.get("kr_enable_pp")
-    if enable_pp is None:
-        metarig.data["kr_enable_pp"] = False
-
-
 def handle_post_generate(generator):
     metarig = generator.metarig
     generated_armature = generator.obj
 
-    # add properties
-    add_kr_properties(metarig)
-
-    add_root_bone = metarig.data.get("kr_extra_root_bone")
-    process_group = metarig.data.get("kr_process_group_name")
-    enable_pp = metarig.data.get("kr_enable_pp")
+    add_root_bone = metarig.data.kr_extra_root_bone
+    process_group = metarig.data.kr_process_group_name
+    enable_pp = metarig.data.kr_enable_pp
 
     if enable_pp and process_group != '':
         # actual postprocessing
         export_collection = generated_armature.data.collections.get(
-            metarig.data["kr_process_group_name"])
+            process_group)
         if not export_collection:
             print("Error: postprocess group not found!")
             return

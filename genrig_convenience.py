@@ -467,12 +467,10 @@ class RIGIFY_OT_hide_wgt_collections(Operator):
 HIDE_METARIG_PROPNAME = "kr_hide_metarig"
 
 def handle_post_generate(generator):
-    hide_metarig = generator.obj.data.get(HIDE_METARIG_PROPNAME)
-    if hide_metarig is None:
-        generator.obj.data[HIDE_METARIG_PROPNAME] = False
-    else:
-        if hide_metarig:
-            generator.metarig.hide_set(True)
+    hide_metarig = generator.obj.data.kr_hide_metarig
+
+    if hide_metarig:
+        generator.metarig.hide_set(True)
             
     state = get_create_wp_state_container(generator.obj.data)
     if state:
@@ -580,9 +578,7 @@ class RIGIFY_PT_k_convenience(Panel):
             
         layout.operator("rigify.edit_metarig", icon='ARMATURE_DATA')
 
-        hide_metarig = arm.get(HIDE_METARIG_PROPNAME)
-        if hide_metarig is not None:
-            layout.prop(arm, HIDE_METARIG_PROPNAME,
+        layout.prop(arm, "kr_hide_metarig",
                      text="Hide Metarig After Generation")
 
 

@@ -199,7 +199,7 @@ The post-generation callback performs the configured processing automatically.
 
 ## Requirements
 
-* Developed in Blender 4.4
+* Developed in Blender 4.4, 5.2
 * Rigify, as included with Blender
 
 The code directly imports Rigify internals such as `SkinEyeRig`, `EyeClusterControl`, `BaseLimbRig`, Rigify generator functionality, and Rigify naming/utilities.
